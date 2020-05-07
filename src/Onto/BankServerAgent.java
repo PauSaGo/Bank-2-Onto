@@ -35,12 +35,13 @@ import ontologies.*;
 public class BankServerAgent extends Agent implements BankVocabulary {
 // -------------------------------------------------------------------
 
-   private Map accounts = new HashMap();
-   private Map operations = new HashMap();
+   private final Map accounts = new HashMap();
+   private final Map operations = new HashMap();
    private int idCnt = 0;
-   private Codec codec = new SLCodec();
-   private Ontology ontology = BankOntology.getInstance();
+   private final Codec codec = new SLCodec();
+   private final Ontology ontology = BankOntology.getInstance();
 
+   @Override
    protected void setup() {
 // ------------------------
 
@@ -62,6 +63,7 @@ public class BankServerAgent extends Agent implements BankVocabulary {
          super(a);
       }
 
+      @Override
       public void action() {
 
          ServiceDescription sd = new ServiceDescription();
@@ -81,7 +83,6 @@ public class BankServerAgent extends Agent implements BankVocabulary {
          }
          catch (Exception ex) {
             System.out.println("Failed registering with DF! Shutting down...");
-            ex.printStackTrace();
             doDelete();
          }
       }
@@ -96,6 +97,7 @@ public class BankServerAgent extends Agent implements BankVocabulary {
          super(a);
       }
 
+      @Override
       public void action() {
 
          ACLMessage msg = receive();
@@ -129,14 +131,14 @@ public class BankServerAgent extends Agent implements BankVocabulary {
                default: replyNotUnderstood(msg);
             }
          }
-         catch(Exception ex) { ex.printStackTrace(); }
+         catch(Codec.CodecException | OntologyException ex) {}
       }
    }
 
    class HandleCreateAccount extends OneShotBehaviour {
 // ----------------------------------------------------  Handler for a CreateAccount request
 
-      private ACLMessage request;
+      private final ACLMessage request;
 
       HandleCreateAccount(Agent a, ACLMessage request) {
 
@@ -144,6 +146,7 @@ public class BankServerAgent extends Agent implements BankVocabulary {
          this.request = request;
       }
 
+      @Override
       public void action() {
 
          try {
@@ -163,14 +166,14 @@ public class BankServerAgent extends Agent implements BankVocabulary {
             System.out.println("Account [" + acc.getName() + " # " +
                                acc.getId() + "] created!");
          }
-         catch(Exception ex) { ex.printStackTrace(); }
+         catch(Codec.CodecException | OntologyException ex) {}
       }
    }
 
    class HandleOperation extends OneShotBehaviour {
 // ------------------------------------------------  Handler for an Operation request
 
-      private ACLMessage request;
+      private final ACLMessage request;
 
       HandleOperation(Agent a, ACLMessage request) {
 
@@ -178,6 +181,7 @@ public class BankServerAgent extends Agent implements BankVocabulary {
          this.request = request;
       }
 
+      @Override
       public void action() {
 
          try {
@@ -194,14 +198,14 @@ public class BankServerAgent extends Agent implements BankVocabulary {
                System.out.println("Operation processed.");
             }
          }
-         catch(Exception ex) { ex.printStackTrace(); }
+         catch(Codec.CodecException | OntologyException ex) {}
       }
    }
 
    class HandleInformation extends OneShotBehaviour {
 // --------------------------------------------------  Handler for an Information query
 
-      private ACLMessage query;
+      private final ACLMessage query;
 
       HandleInformation(Agent a, ACLMessage query) {
 
@@ -209,6 +213,7 @@ public class BankServerAgent extends Agent implements BankVocabulary {
          this.query = query;
       }
 
+      @Override
       public void action() {
 
          try {
@@ -225,7 +230,7 @@ public class BankServerAgent extends Agent implements BankVocabulary {
                System.out.println("Information processed.");
             }
          }
-         catch(Exception ex) { ex.printStackTrace(); }
+         catch(Codec.CodecException | OntologyException ex) {}
       }
    }
 
@@ -240,7 +245,7 @@ public class BankServerAgent extends Agent implements BankVocabulary {
          send(reply);
          System.out.println("Not understood!");
       }
-      catch(Exception ex) { ex.printStackTrace(); }
+      catch(Codec.CodecException | OntologyException ex) {}
    }
 
    Object processOperation(MakeOperation mo) {

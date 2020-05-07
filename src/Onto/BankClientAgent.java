@@ -42,10 +42,11 @@ public class BankClientAgent extends Agent implements BankVocabulary {
    private int command = WAIT;
    private int cnt = 0;
    private AID server;
-   private List accounts = new ArrayList();
-   private Codec codec = new SLCodec();
-   private Ontology ontology = BankOntology.getInstance();
+   private final List accounts = new ArrayList();
+   private final Codec codec = new SLCodec();
+   private final Ontology ontology = BankOntology.getInstance();
 
+   @Override
    protected void setup() {
 // ------------------------
 
@@ -66,6 +67,7 @@ public class BankClientAgent extends Agent implements BankVocabulary {
          command = WAIT;
       }
 
+      @Override
       public void action() {
 
          command = getUserChoice();
@@ -172,6 +174,7 @@ public class BankClientAgent extends Agent implements BankVocabulary {
 
          addSubBehaviour(new WakerBehaviour(myAgent, 5000) {
 
+            @Override
             protected void handleElapsedTimeout() {
                System.out.println("\n\tNo response from server. Please, try later!");
                addBehaviour(new WaitUserCommand(myAgent));
@@ -190,6 +193,7 @@ public class BankClientAgent extends Agent implements BankVocabulary {
          super(a);
       }
 
+      @Override
       public void action() {
 
          ACLMessage msg = receive(MessageTemplate.MatchSender(server));
@@ -248,13 +252,15 @@ public class BankClientAgent extends Agent implements BankVocabulary {
                   System.out.println("\n\tUnable de decode response from server!");
                }
             }
-            catch (Exception e) { e.printStackTrace(); }
+            catch (Codec.CodecException | OntologyException e) {}
          }
          finished = true;
       }
 
+      @Override
       public boolean done() { return finished; }
 
+      @Override
       public int onEnd() {
          addBehaviour(new WaitUserCommand(myAgent));
          return 0;
@@ -278,7 +284,6 @@ public class BankClientAgent extends Agent implements BankVocabulary {
          else  System.out.println("\nCouldn't localize server!");
       }
       catch (Exception ex) {
-         ex.printStackTrace();
          System.out.println("\nFailed searching int the DF!");
       }
    }
@@ -334,7 +339,7 @@ public class BankClientAgent extends Agent implements BankVocabulary {
          String in = buf.readLine();
          return Integer.parseInt(in);
       }
-      catch (Exception ex) { ex.printStackTrace(); }
+      catch (IOException | NumberFormatException ex) {}
       return WAIT;
    }
 
@@ -347,7 +352,7 @@ public class BankClientAgent extends Agent implements BankVocabulary {
          String in = buf.readLine();
          return Integer.parseInt(in);
       }
-      catch (Exception ex) { ex.printStackTrace(); }
+      catch (IOException | NumberFormatException ex) {}
       return -1;
    }
 
@@ -359,7 +364,7 @@ public class BankClientAgent extends Agent implements BankVocabulary {
          BufferedReader buf = new BufferedReader(new InputStreamReader(System.in));
          return buf.readLine();
       }
-      catch (Exception ex) { ex.printStackTrace(); }
+      catch (Exception ex) {}
       return null;
    }
 
@@ -381,7 +386,7 @@ public class BankClientAgent extends Agent implements BankVocabulary {
          System.out.println("Contacting server... Please wait!");
          addBehaviour(new WaitServerResponse(this));
       }
-      catch (Exception ex) { ex.printStackTrace(); }
+      catch (Codec.CodecException | OntologyException ex) {}
    }
 
 }
